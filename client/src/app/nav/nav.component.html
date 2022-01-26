@@ -1,0 +1,59 @@
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Salrus API</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+  
+      <div class="collapse navbar-collapse" id="navbarsExample04">
+        <ul class="navbar-nav mr-auto mb-2 mb-md-0">
+          <li class="nav-item active">
+            <a class="nav-link" aria-current="page" href="#">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Ссылка</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+          </li>
+          <li dropdown class="nav-item dropdown" *ngIf="currentUser$ | async" ngbDropdown>
+            <a style="cursor: pointer;" dropdownToggle class="nav-link" id="dropdown04" data-toggle="dropdown" aria-expanded="false">WB API</a>
+            <ul *dropdownMenu class="dropdown-menu" aria-labelledby="dropdown04">
+              <li><a class="dropdown-item" routerLink="/detail-report">Отчеты комиссионера</a></li>
+              <li><a class="dropdown-item" routerLink="/sales-report">Продажи</a></li>
+              <li><a class="dropdown-item" routerLink="/stocks-report">Склад</a></li>
+              <div class="dropdown-divider"></div>
+              <li><a class="dropdown-item" routerLink="/fbs-report">FBS</a></li>
+            </ul>
+          </li>
+        </ul>
+        <div class="dropdown" *ngIf="(currentUser$ | async) as user" dropdown>
+            <a style="cursor: pointer;" class="dropdown-toggle text-light ml-2" dropdownToggle>Welcome {{user.username| titlecase}}</a>
+            <div class="dropdown-menu mt-3" *dropdownMenu>
+              <a class="dropdown-item" routerLink='/member/edit' routerLinkActive='active'>Edit Profile</a>
+              <div class="dropdown-divider"></div>
+              <a href="" class="dropdown-item" (click)="logout()">Logout</a>
+            </div>
+          </div>
+        <form *ngIf="(currentUser$ | async) === null" #loginForm = "ngForm" class="form-inline mt-2 mt-md-0" (ngSubmit)="login()" 
+            autocomplete="off">
+            <input
+            name = "username" 
+            [(ngModel)]="model.username"
+            class="form-control mr-sm-2" 
+            type="text" 
+            placeholder="login">
+            <input 
+            name="password"
+            [(ngModel)]="model.password"
+            class="form-control mr-sm-2" 
+            type="password" 
+            placeholder="password">
+          <button class="btn btn-success my-2 my-sm-0" type="submit">Login</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+
+  

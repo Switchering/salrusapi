@@ -1,0 +1,57 @@
+<div class="container-fluid">
+  <form class="form-inline mt-3" [formGroup]='fbsReportForm' (ngSubmit)="fbsReportForm.valid && loadOrders()"
+    autocomplete="off">
+    <div>
+      <div class="col-xs-12 col-12 col-md-4 form-group mb-3">
+        <label>Дата начала</label>
+        <input type="text" placeholder="Datepicker" class="form-control" bsDatepicker formControlName="date_start"
+          [bsConfig]="{ containerClass: 'theme-dark-blue', showTodayButton: true, todayPosition: 'center', dateInputFormat: 'DD.MM.YYYY' }">
+      </div>
+      <div class="col-xs-12 col-12 col-md-4 form-group mb-3">
+        <label>Количество</label>
+        <input type="number" class="form-control ml-1" style="width: 70px;" formControlName="take">
+        <div class="alert alert-danger mt-3" *ngIf="_take!.invalid && (_take!.touched || _take!.dirty)">
+          <span *ngIf="_take!.errors?.['required']">Field is required</span>
+        </div>
+      </div>
+
+      <div class="col-xs-12 col-12 col-md-4 form-group mb-3">
+        <label>Пропустить</label>
+        <input type="number" class="form-control ml-1" style="width: 70px;" formControlName="skip">
+      </div>
+
+      <button class="btn btn-outline-secondary ml-2 my-2 my-sm-0" type="submit">
+        Загрузить
+      </button>
+    </div>
+  </form>
+
+  <hr />
+  <pre>Model: {{ startDate | json }}</pre>
+  <div>
+    <p>You can bind our <code>NgbPagination</code> component with slicing the data list</p>
+
+    <table class="table table-striped" *ngIf="orders !== undefined && orders !== null">
+      <thead>
+        <tr>           
+          <th *ngFor="let header of getHeaders()">{{header}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of orders.orders">           
+          <td *ngFor="let key of getHeaders()">{{item[key]}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+<p>
+  <!-- {"orderId":"182741851","dateCreated":"2022-01-25T10:33:10.630083Z","wbWhId":119408,"storeId":2593,"pid":11381,"officeAddress":"","deliveryAddress":"",
+  "deliveryAddressDetails":
+    {"province":"","area":"","city":"","street":"","home":"","flat":"","entrance":"","longitude":0,"latitude":0},
+  "userInfo":
+    {"userId":19548615,"fio":"Михайлова Наталья","phone":79039949490},
+  "chrtId":29151334,"barcode":"8427457015463","barcodes":["8427457015463"],"status":2,"userStatus":4,"rid":"102350661443","totalPrice":29100,"orderUID":"18774307556530994_878443c078ba42a8b8efeaa803017445","deliveryType":1} -->
+</p>
