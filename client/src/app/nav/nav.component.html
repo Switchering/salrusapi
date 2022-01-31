@@ -1,14 +1,13 @@
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Salrus API</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+    <div class="container">
+      <a class="navbar-brand"  routerLink='/' routerLinkActive='active'>Salrus API</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-  
-      <div class="collapse navbar-collapse" id="navbarsExample04">
-        <ul class="navbar-nav mr-auto mb-2 mb-md-0">
-          <li class="nav-item active">
-            <a class="nav-link" aria-current="page" href="#">Главная</a>
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Главная</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Ссылка</a>
@@ -16,7 +15,7 @@
           <li class="nav-item">
             <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
           </li>
-          <li dropdown class="nav-item dropdown" *ngIf="currentUser$ | async" ngbDropdown>
+          <li dropdown class="nav-item dropdown" *ngIf="accountService.currentUser$ | async" ngbDropdown>
             <a style="cursor: pointer;" dropdownToggle class="nav-link" id="dropdown04" data-toggle="dropdown" aria-expanded="false">WB API</a>
             <ul *dropdownMenu class="dropdown-menu" aria-labelledby="dropdown04">
               <li><a class="dropdown-item" routerLink="/detail-report">Отчеты комиссионера</a></li>
@@ -27,7 +26,29 @@
             </ul>
           </li>
         </ul>
-        <div class="dropdown" *ngIf="(currentUser$ | async) as user" dropdown>
+        <form *ngIf="(accountService.currentUser$ | async) === null" #loginForm = "ngForm" class="row g-2" (ngSubmit)="login()" 
+            autocomplete="off">
+            <div class="col">
+              <input style="margin-right: 2;"
+              name = "username" 
+              [(ngModel)]="model.username"
+              class="form-control mr-sm-2" 
+              type="text" 
+              placeholder="login">
+            </div>
+           <div class="col">
+            <input 
+            name="password"
+            [(ngModel)]="model.password"
+            class="form-control mr-sm-2" 
+            type="password" 
+            placeholder="password">
+           </div>
+           <div class="col">
+            <button class="btn btn-success my-2 my-sm-0" type="submit">Login</button>
+           </div>
+        </form>
+        <div class="dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
             <a style="cursor: pointer;" class="dropdown-toggle text-light ml-2" dropdownToggle>Welcome {{user.username| titlecase}}</a>
             <div class="dropdown-menu mt-3" *dropdownMenu>
               <a class="dropdown-item" routerLink='/member/edit' routerLinkActive='active'>Edit Profile</a>
@@ -35,22 +56,6 @@
               <a href="" class="dropdown-item" (click)="logout()">Logout</a>
             </div>
           </div>
-        <form *ngIf="(currentUser$ | async) === null" #loginForm = "ngForm" class="form-inline mt-2 mt-md-0" (ngSubmit)="login()" 
-            autocomplete="off">
-            <input
-            name = "username" 
-            [(ngModel)]="model.username"
-            class="form-control mr-sm-2" 
-            type="text" 
-            placeholder="login">
-            <input 
-            name="password"
-            [(ngModel)]="model.password"
-            class="form-control mr-sm-2" 
-            type="password" 
-            placeholder="password">
-          <button class="btn btn-success my-2 my-sm-0" type="submit">Login</button>
-        </form>
       </div>
     </div>
   </nav>

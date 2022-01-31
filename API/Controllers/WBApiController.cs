@@ -9,6 +9,7 @@ using System.Web;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class WBApiController : BaseApiController
     {
         private HttpClient httpClient;
@@ -20,7 +21,7 @@ namespace API.Controllers
         }
 
         [HttpPost("GetOrders")]
-        // [Authorize]
+
         public async Task<ActionResult> Getorders(OrdersDto ordersDto)
         {
             string apiUrl = string.Format("https://suppliers-api.wildberries.ru/api/v2/orders?date_start={0}&status={1}&take={2}&skip={3}",

@@ -1,7 +1,17 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators  } from '@angular/forms';
+import { PageChangedEvent } from 'ngx-bootstrap/pagination';
+import { take } from 'rxjs';
+import { PageParams } from 'src/app/_models/pageParams';
+import { Pagination } from 'src/app/_models/pagination';
+import { User } from 'src/app/_models/user';
+import { AccountService } from 'src/app/_services/account.service';
 import { WBApiService } from 'src/app/_services/wbapi.service';
+import { defineLocale } from 'ngx-bootstrap/chronos';
+import { ruLocale } from 'ngx-bootstrap/locale';
+import { BsLocaleService } from 'ngx-bootstrap/datepicker';
+defineLocale('ru', ruLocale);
 
 @Component({
   selector: 'app-fbs-report',
@@ -9,40 +19,48 @@ import { WBApiService } from 'src/app/_services/wbapi.service';
   styleUrls: ['./fbs-report.component.css']
 })
 export class FbsReportComponent implements OnInit {
-  fbsReportForm!: FormGroup;
+  fbsReportForm: FormGroup;
   startDate: Date = new Date();
   orders: any;
   validationErrors: string[] = [];
+  user!: User;
+  pagination: Pagination;
+  pageParams: PageParams;
+  returnedArray?: any[];
   
-  constructor(private wbapiService: WBApiService, private http: HttpClient, 
-    private fb: FormBuilder) { }
+  constructor(private wbapiService: WBApiService, private http: HttpClient,
+    private accountService: AccountService, private fb: FormBuilder, localeService: BsLocaleService) {
+      accountService.currentUser$.pipe(take(1)).subscribe(user => {
+        this.user = user;
+      });
+      defineLocale('ru', ruLocale);
+        localeService.use('ru');
+     }
 
   ngOnInit(): void {
     this.initializeForm();
+    
   }
 
   initializeForm() {
     this.fbsReportForm = this.fb.group({
       date_start: [this.startDate, Validators.required],
-      take: ['', Validators.required],
-      skip: ['', Validators.required],
+      take: ['10', Validators.required],
+      skip: ['0', Validators.required],
     });
   }
+  
+  pageChanged(event: PageChangedEvent): void {
+    const startItem = (event.page - 1) * event.itemsPerPage;
+    const endItem = event.page * event.itemsPerPage;
+    this.returnedArray = this.orders.orders.slice(startItem, endItem);
+  }
 
-  // loadDataFromApi(){
-  //   let todayString = this.convertDateToString(this.startDate);
-  //   this.fbsUrl = "https://suppliers-api.wildberries.ru/api/v2/orders?date_start=" + todayString + "&status=2&take=1&skip=0"
-  //   let authHeaders: HttpHeaders = new HttpHeaders();
-  //   authHeaders = authHeaders.append('Accept', 'application/json');
-  //   authHeaders = authHeaders.append('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6IjcyMDk4NzkyLTg1ZDItNGRjZC1iMGNiLWQ0M2FmM2VkZDE1YyJ9.D_pUUY8neP_OobBQEqRtgiqMVTO0Dg2DuQI2UbeXnmA')
-  //   this.http.get(this.fbsUrl, {headers: authHeaders}).subscribe(response => {
-  //     console.log(response);
-  //   })
-  // }
- 
   loadOrders(){
+    console.log(this.fbsReportForm.getRawValue());
     this.wbapiService.loadOrders(this.fbsReportForm.getRawValue()).subscribe(response => {
       this.orders = response;
+      this.returnedArray = this.orders.orders.slice(0, 10);
     });
   }
 

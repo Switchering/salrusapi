@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, Self } from '@angular/core';
-import { ControlValueAccessor, NgControl } from '@angular/forms';
+import { ControlValueAccessor, FormControl, NgControl } from '@angular/forms';
 import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
 
 @Component({
@@ -19,13 +19,17 @@ export class DateInputComponent implements ControlValueAccessor {
     }
   }
 
+  get control(): FormControl {
+    return this.ngControl.control as FormControl;
+  }
+
+  registerOnTouched(fn: any): void {
+  }
+  setDisabledState?(isDisabled: boolean): void {  
+  }
   writeValue(obj: any): void {
   }
   registerOnChange(fn: any): void {
   }
-  registerOnTouched(fn: any): void {
-
-  }
-
 }
 
