@@ -3,14 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators  } from '@angular/forms';
 import { PageChangedEvent } from 'ngx-bootstrap/pagination';
 import { take } from 'rxjs';
-import { PageParams } from 'src/app/_models/pageParams';
-import { Pagination } from 'src/app/_models/pagination';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { WBApiService } from 'src/app/_services/wbapi.service';
 import { defineLocale } from 'ngx-bootstrap/chronos';
 import { ruLocale } from 'ngx-bootstrap/locale';
 import { BsLocaleService } from 'ngx-bootstrap/datepicker';
+import { saveAs } from 'file-saver';
 defineLocale('ru', ruLocale);
 
 @Component({
@@ -24,9 +23,8 @@ export class FbsReportComponent implements OnInit {
   orders: any;
   validationErrors: string[] = [];
   user!: User;
-  pagination: Pagination;
-  pageParams: PageParams;
   returnedArray?: any[];
+  fileName='Orders.xslx';
   
   constructor(private wbapiService: WBApiService, private http: HttpClient,
     private accountService: AccountService, private fb: FormBuilder, localeService: BsLocaleService) {
@@ -45,8 +43,11 @@ export class FbsReportComponent implements OnInit {
   initializeForm() {
     this.fbsReportForm = this.fb.group({
       date_start: [this.startDate, Validators.required],
-      take: ['10', Validators.required],
-      skip: ['0', Validators.required],
+      date_end: [''],
+      take: [10, Validators.required],
+      skip: [0, Validators.required],
+      status: [2],
+      id: [],
     });
   }
   
@@ -62,6 +63,18 @@ export class FbsReportComponent implements OnInit {
       this.orders = response;
       this.returnedArray = this.orders.orders.slice(0, 10);
     });
+  }
+
+  downloadExcel() {
+    this.wbapiService.downloadFile(this.orders.orders)
+      .subscribe((response: any) => {
+        let blob: any = new Blob([response], { type: 'text/json; charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        //window.open(url);
+        saveAs(blob, 'file.xlsx');
+      }),
+      (error: any) => console.log('Error downloading the file'),
+      () => console.info('File downloaded successfully');
   }
 
   getHeaders() {

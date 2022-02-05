@@ -4,14 +4,14 @@ namespace API.DTOs
 {
     public class OrdersDto
     {
-        // [Required]
+        [Required]
         public string Date_start { get; set; }
-        // public string date_end { get; set; }
-        // public int status { get; set; }
-        // [Required]
+        public int? Status { get; set; }
+        [Required]
         public int Take  { get; set; }
-        // [Required]
+        [Required]
         public int Skip  { get; set; }
-        // public int id { get; set; }
+        public int? Id { get; set; }
+        public string? Date_end { get; set; }
     }
 }

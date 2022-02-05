@@ -8,7 +8,7 @@ import { PaginatedResult } from '../_models/pagination';
   providedIn: 'root'
 })
 export class WBApiService {
-  baseUrl = environment.apiUrl;
+  baseUrl = environment.apiUrl+'wbapi/';
   headers = new HttpHeaders({
         'Content-Type': 'application/json'
     })
@@ -24,7 +24,7 @@ export class WBApiService {
   // }
 
   loadOrders(formParams: any){
-    return this.http.post('https://localhost:5001/api/wbapi/getorders', formParams, {headers: this.headers});
+    return this.http.post(this.baseUrl + 'getorders', formParams, {headers: this.headers});
   }
 
   private getPaginatedResult<T>(url: any, params: any){
@@ -47,5 +47,10 @@ export class WBApiService {
     params = params.append('pageSize', pageSize.toString());
 
     return params;
+  }
+
+  downloadFile(ordersJson: any): any {
+    return this.http
+        .post(this.baseUrl + 'ExportToExcel', ordersJson,  {headers: this.headers, responseType: 'blob'});
   }
 }

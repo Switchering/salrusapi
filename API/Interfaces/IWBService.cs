@@ -5,6 +5,7 @@ namespace API.Interfaces
         string WbKey1 { get; set; }
         string WbKey2 { get; set; }
         string GetWBKey();
-        HttpClient getHttpClient2();
+        HttpClient GetHttpClient2();
+        string GetFullUrl(string baseUrl, Object dto );
     }
 }

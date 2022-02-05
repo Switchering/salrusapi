@@ -38,7 +38,7 @@ import { DateInputComponent } from './_forms/date-input/date-input.component';
     BrowserAnimationsModule,
     BsDatepickerModule.forRoot(),
     BsDropdownModule.forRoot(),
-    PaginationModule.forRoot() 
+    PaginationModule.forRoot(),
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}

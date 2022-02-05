@@ -1,5 +1,7 @@
 using System.Net.Http.Headers;
+using System.Reflection;
 using API.Interfaces;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace API.Services
 {
@@ -21,7 +23,8 @@ namespace API.Services
             return WbKey2;
         }
 
-        public HttpClient getHttpClient2()
+        //Get the WB Api http client
+        public HttpClient GetHttpClient2()
         {
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -29,5 +32,29 @@ namespace API.Services
 
             return httpClient;
         }
+        
+        //Get full api url. Some of the parameters might be unrequired and might be null
+        //So this function create url based on filled parameters
+        public string GetFullUrl(string baseUrl, Object dto)
+        {
+            var kvps = new List<KeyValuePair<string, string>>();
+            foreach(PropertyInfo propertyInfo in dto.GetType().GetProperties())
+            {
+                Object value = propertyInfo.GetValue(dto);
+                if (Object.ReferenceEquals(null, value))
+                    continue;
+                string strValue = value.ToString(); 
+                if(!String.IsNullOrEmpty(strValue))
+                {
+                    kvps.Add(new KeyValuePair<string, string>(propertyInfo.Name.ToLower(), strValue));
+                }                
+            }
+
+            var query = new QueryBuilder(kvps).ToQueryString();
+            var finalQuery = baseUrl + query;  
+
+            return finalQuery;
+        }
+
     }
 }
