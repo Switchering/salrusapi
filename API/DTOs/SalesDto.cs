@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs
 {
-    public class OrdersDto
+    public class SalesDto
     {
         [Required]
         public string dateFrom { get; set; }

@@ -1,4 +1,6 @@
+using API.Data;
 using API.DTOs;
+using API.Entitites.WBEntities;
 using API.Helpers;
 using API.Interfaces;
 using API.Services;
@@ -19,71 +21,12 @@ namespace API.Controllers
     {
         private HttpClient httpClient;
         private readonly IWBService _WBService;
+        private readonly DataContext _context;
 
-        public WBApiController(IWBService WBService)
+        public WBApiController(IWBService WBService, DataContext context)
         {
             _WBService = WBService;
-        }
-
-        
-
-        // [HttpPost("GetOrders")]
-
-        // public async Task<ActionResult> Getorders(OrdersDto ordersDto)
-        // {
-            // List of params from Swagger WB Api: 
-            //  date_start(required) - С какой даты вернуть сборочные задания (заказы) (в формате RFC3339)
-            //  date_end             - По какую дату вернуть сборочные задания (заказы) (в формате RFC3339)
-            //  status               - Заказы какого статуса нужны
-            //  take(required)       - Сколько записей вернуть за раз
-            //  skip(required)       - Сколько записей пропустить
-            //  id                   - Идентификатор сборочного задания, если нужно получить данные по какому-то определенному заказу
-
-        //     string apiUrl = string.Format("https://suppliers-api.wildberries.ru/api/v2/orders?date_start={0}&status={1}&take={2}&skip={3}",
-        //         HttpUtility.UrlEncode(ordersDto.Date_start),
-        //         "2",
-        //         ordersDto.Take.ToString(),
-        //         ordersDto.Skip.ToString()
-        //         );   
-        //     //string apiTest = "https://suppliers-api.wildberries.ru/api/v2/orders?date_start=2022-01-19T00%3A00%3A00%2B03%3A00&status=2&take=10&skip=0";
-        //     List<Object> reservationList = new List<Object>();
-        //     using (var httpClient = _WBService.getHttpClient2())
-        //     {
-        //         HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
-        //         if (response.IsSuccessStatusCode)
-        //         {
-        //             var jsonString = response.Content.ReadAsStringAsync().Result;
-        //             return Content(jsonString, "application/json");
-        //         }
-        //         else
-        //             return BadRequest("Can not reach");
-        //     }
-        // }
-
-        [HttpPost("GetOrders")]
-        public async Task<ActionResult> GetOrders(OrdersDto ordersDto)
-        {
-            //List of params from Swagger WB Api: 
-            //  date_start(required) - С какой даты вернуть сборочные задания (заказы) (в формате RFC3339)
-            //  date_end             - По какую дату вернуть сборочные задания (заказы) (в формате RFC3339)
-            //  status               - Заказы какого статуса нужны
-            //  take(required)       - Сколько записей вернуть за раз
-            //  skip(required)       - Сколько записей пропустить
-            //  id                   - Идентификатор сборочного задания, если нужно получить данные по какому-то определенному заказу
-            string apiUrl = "https://suppliers-api.wildberries.ru/api/v2/orders";
-            apiUrl = _WBService.GetFullUrl(apiUrl, ordersDto);
-            // return Content(apiUrl);
-            using (var httpClient = _WBService.GetHttpClient2())
-            {
-                HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
-                if (response.IsSuccessStatusCode)
-                {
-                    var jsonString = response.Content.ReadAsStringAsync().Result;
-                    return Content(jsonString, "application/json");
-                }
-                else
-                    return BadRequest("Can not reach");
-            }
+            _context = context;
         }
 
         [HttpPost("ExportToExcel")]
@@ -101,16 +44,66 @@ namespace API.Controllers
             // return BadRequest();
         }
 
-        [HttpGet("GetSales/{date}")]
+        [HttpPost("GetSales")]
         [Authorize]
-        public async Task<ActionResult> GetSales(string dateStart)
+        public async Task<ActionResult> GetSales(SalesDto salesDto)
         {
-            var todayString = "2022-01-17T00%3A00%3A00%2B03%3A00";
+            string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/sales";
+            apiUrl = _WBService.GetFullUrl(apiUrl, salesDto, true);
+
             List<Object> reservationList = new List<Object>();
+            using (var httpClient = _WBService.GetHttpClientOld())
+            {
+                HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonString = response.Content.ReadAsStringAsync().Result;
+                    UploadSalesToDB(jsonString);
+                    return Content(jsonString, "application/json");
+                }
+                else
+                    return BadRequest("Can not reach");
+            }
+        }
+
+        [HttpPost("GetOrders")]
+        [Authorize]
+        public async Task<ActionResult> GetOrders(OrdersDto ordersDto)
+        {
+            string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/orders";
+            apiUrl = _WBService.GetFullUrl(apiUrl, ordersDto, true);
+
+            List<Object> reservationList = new List<Object>();
+            using (var httpClient = _WBService.GetHttpClientOld())
+            {
+                HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonString = response.Content.ReadAsStringAsync().Result;
+                    UploadOrdersToDB(jsonString);
+                    return Content(jsonString, "application/json");
+                }
+                else
+                    return BadRequest("Can not reach");
+            }
+        }
+
+        [HttpPost("GetFBSOrders")]
+        public async Task<ActionResult> GetFBSOrders(FBSOrdersDto FBSOrdersDto)
+        {
+            //List of params from Swagger WB Api: 
+            //  date_start(required) - С какой даты вернуть сборочные задания (заказы) (в формате RFC3339)
+            //  date_end             - По какую дату вернуть сборочные задания (заказы) (в формате RFC3339)
+            //  status               - Заказы какого статуса нужны
+            //  take(required)       - Сколько записей вернуть за раз
+            //  skip(required)       - Сколько записей пропустить
+            //  id                   - Идентификатор сборочного задания, если нужно получить данные по какому-то определенному заказу
+            string apiUrl = "https://suppliers-api.wildberries.ru/api/v2/orders";
+            apiUrl = _WBService.GetFullUrl(apiUrl, FBSOrdersDto);
+            // return Content(apiUrl);
             using (var httpClient = _WBService.GetHttpClient2())
             {
-                HttpResponseMessage response = await httpClient.GetAsync("https://suppliers-api.wildberries.ru/api/v2/orders?date_start=" + todayString + "&status=2&take=1&skip=0");
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = response.Content.ReadAsStringAsync().Result;
@@ -118,6 +111,27 @@ namespace API.Controllers
                 }
                 else
                     return BadRequest("Can not reach");
+            }
+        }
+
+        private void UploadSalesToDB(string jsonString)
+        {
+            List<Sale> objData = JsonSerializer.Deserialize<List<Sale>>(jsonString);
+            _context.Sales.AddRangeAsync(objData);
+            _context.SaveChanges();
+        }
+
+          private void UploadOrdersToDB(string jsonString)
+        {
+            List<Order> objData = JsonSerializer.Deserialize<List<Order>>(jsonString);
+            _context.Orders.AddRange(objData);
+            try
+            {
+                 _context.SaveChanges();
+            }
+            catch
+            {
+
             }
         }
 

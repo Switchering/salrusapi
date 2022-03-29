@@ -13,7 +13,9 @@ namespace API.Extensions
             services.AddScoped<IWBService, WBService>();
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+                //options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(_config.GetConnectionString("PostgreConnection"));
+                options.EnableSensitiveDataLogging();
             });
 
             return services;

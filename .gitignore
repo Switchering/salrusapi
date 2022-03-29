@@ -456,4 +456,5 @@ $RECYCLE.BIN/
 
 *.db
 appsettings.json
-appsettings.Development.json
+API\appsettings.Development.json
+.local-chromium

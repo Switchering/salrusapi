@@ -7,14 +7,14 @@ namespace API.Services
 {
     public class WBService : IWBService
     {
-        public string WbKey1 { get; set; }
+        public string WbKeyOld { get; set; }
         public string WbKey2 { get; set; }
         private readonly IConfiguration _config;
 
         public WBService(IConfiguration config)
         {
             _config = config;
-            WbKey1 = _config["WBApiKey1"];
+            WbKeyOld = _config["WBApiKeyOld"];
             WbKey2 = _config["WBApiKey2"];
         }
 
@@ -32,10 +32,17 @@ namespace API.Services
 
             return httpClient;
         }
+
+        public HttpClient GetHttpClientOld()
+        {
+            HttpClient httpClient = new HttpClient();
+
+            return httpClient;
+        }
         
         //Get full api url. Some of the parameters might be unrequired and might be null
         //So this function create url based on filled parameters
-        public string GetFullUrl(string baseUrl, Object dto)
+        public string GetFullUrl(string baseUrl, Object dto, bool isOld)
         {
             var kvps = new List<KeyValuePair<string, string>>();
             foreach(PropertyInfo propertyInfo in dto.GetType().GetProperties())
@@ -43,11 +50,20 @@ namespace API.Services
                 Object value = propertyInfo.GetValue(dto);
                 if (Object.ReferenceEquals(null, value))
                     continue;
+                if (value is bool boolValue) 
+                {
+                    value = boolValue  ? 1 : 0;
+                }
                 string strValue = value.ToString(); 
                 if(!String.IsNullOrEmpty(strValue))
                 {
                     kvps.Add(new KeyValuePair<string, string>(propertyInfo.Name.ToLower(), strValue));
                 }                
+            }
+
+            if (isOld)
+            {
+                kvps.Add(new KeyValuePair<string, string>("key", WbKeyOld));
             }
 
             var query = new QueryBuilder(kvps).ToQueryString();
