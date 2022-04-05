@@ -11,6 +11,7 @@ namespace API.Extensions
         {
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IWBService, WBService>();
+            services.AddScoped<ISalrusService, SalrusService>();
             services.AddDbContext<DataContext>(options =>
             {
                 //options.UseSqlite(_config.GetConnectionString("DefaultConnection"));

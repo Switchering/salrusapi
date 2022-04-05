@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220401141238_IncomesUpdate")]
+    partial class IncomesUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,11 +51,9 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entitites.WBEntities.Income", b =>
                 {
-                    b.Property<int>("incomeId")
+                    b.Property<decimal>("incomeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("incomeId"));
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("date")
                         .HasColumnType("timestamp with time zone");
@@ -76,18 +76,16 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entitites.WBEntities.IncomeDetails", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<decimal>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("barcode")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("incomeId")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("incomeId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("lastChangeDate")
                         .HasColumnType("timestamp with time zone");

@@ -52,6 +52,7 @@ namespace API.Data
       
         public DbSet<AppUser> Users { get; set;}
         public DbSet<Income> Incomes { get; set;}
+        public DbSet<IncomeDetail> IncomeDetails { get; set;}
         public DbSet<Order> Orders { get; set;}
         public DbSet<Sale> Sales { get; set;}
     }

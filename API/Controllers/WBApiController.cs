@@ -1,18 +1,12 @@
 using API.Data;
 using API.DTOs;
-using API.Entitites.WBEntities;
 using API.Helpers;
 using API.Interfaces;
-using API.Services;
-using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
-using System.Reflection;
+using PostgreData;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Web;
+
 
 namespace API.Controllers
 {
@@ -29,6 +23,7 @@ namespace API.Controllers
             _context = context;
         }
 
+        //Excel functions move to salrusApi
         [HttpPost("ExportToExcel")]
         public async Task<ActionResult> ExportToExcel([FromBody] JsonDocument context)
         {
@@ -44,6 +39,7 @@ namespace API.Controllers
             // return BadRequest();
         }
 
+        //Rename to UploadSales etc
         [HttpPost("GetSales")]
         [Authorize]
         public async Task<ActionResult> GetSales(SalesDto salesDto)
@@ -51,14 +47,13 @@ namespace API.Controllers
             string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/sales";
             apiUrl = _WBService.GetFullUrl(apiUrl, salesDto, true);
 
-            List<Object> reservationList = new List<Object>();
             using (var httpClient = _WBService.GetHttpClientOld())
             {
                 HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = response.Content.ReadAsStringAsync().Result;
-                    UploadSalesToDB(jsonString);
+                    //UploadSalesToDB(jsonString);
                     return Content(jsonString, "application/json");
                 }
                 else
@@ -73,14 +68,16 @@ namespace API.Controllers
             string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/orders";
             apiUrl = _WBService.GetFullUrl(apiUrl, ordersDto, true);
 
-            List<Object> reservationList = new List<Object>();
             using (var httpClient = _WBService.GetHttpClientOld())
             {
                 HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = response.Content.ReadAsStringAsync().Result;
-                    UploadOrdersToDB(jsonString);
+
+                    WBPostgre wbp = new WBPostgre(_context);
+                    await wbp.UploadOrdersToDB(jsonString);
+
                     return Content(jsonString, "application/json");
                 }
                 else
@@ -88,6 +85,33 @@ namespace API.Controllers
             }
         }
 
+        [HttpPost("GetIncomes")]
+        [Authorize]
+        public async Task<ActionResult> GetIncomes(IncomesDto incomesDto)
+        {
+            string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/incomes";
+            apiUrl = _WBService.GetFullUrl(apiUrl, incomesDto, true);
+
+            using (var httpClient = _WBService.GetHttpClientOld())
+            {
+                HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonString = response.Content.ReadAsStringAsync().Result;
+
+                    WBPostgre wbp = new WBPostgre(_context);
+                    await wbp.UploadIncomesToDB(jsonString);
+
+                    return Content(jsonString, "application/json");
+                }
+                else
+                    return BadRequest("Can not reach");
+            }
+        }
+
+
+
+        //WB Api 2.0
         [HttpPost("GetFBSOrders")]
         public async Task<ActionResult> GetFBSOrders(FBSOrdersDto FBSOrdersDto)
         {
@@ -113,27 +137,5 @@ namespace API.Controllers
                     return BadRequest("Can not reach");
             }
         }
-
-        private void UploadSalesToDB(string jsonString)
-        {
-            List<Sale> objData = JsonSerializer.Deserialize<List<Sale>>(jsonString);
-            _context.Sales.AddRangeAsync(objData);
-            _context.SaveChanges();
-        }
-
-          private void UploadOrdersToDB(string jsonString)
-        {
-            List<Order> objData = JsonSerializer.Deserialize<List<Order>>(jsonString);
-            _context.Orders.AddRange(objData);
-            try
-            {
-                 _context.SaveChanges();
-            }
-            catch
-            {
-
-            }
-        }
-
     }
 }
