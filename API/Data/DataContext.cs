@@ -50,10 +50,15 @@ namespace API.Data
             //--DateTime To UTC Value Converter
         }
       
-        public DbSet<AppUser> Users { get; set;}
-        public DbSet<Income> Incomes { get; set;}
-        public DbSet<IncomeDetail> IncomeDetails { get; set;}
-        public DbSet<Order> Orders { get; set;}
-        public DbSet<Sale> Sales { get; set;}
+        public DbSet<AppUser>? Users { get; set;}
+        public DbSet<Income>? Incomes { get; set;}
+        public DbSet<IncomeDetail>? IncomeDetails { get; set;}
+        public DbSet<Order>? Orders { get; set;}
+        public DbSet<OrderDetail>? OrderDetails { get; set;}
+        public DbSet<Sale>? Sales { get; set;}
+
+        public DbSet<PrintOrder>? PrintOrders { get; set;}
+        public DbSet<FBSProduct>? FBS { get; set;}
+        public DbSet<FBOProduct>? FBO { get; set;}
     }
 }

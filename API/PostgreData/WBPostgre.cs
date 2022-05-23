@@ -1,71 +1,97 @@
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Entitites.WBEntities;
 using API.JDOs;
+using API.DTOs;
+using API.Helpers;
+using AutoMapper;
 
 namespace PostgreData
 {
     public class WBPostgre
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
         public WBPostgre(DataContext context)
         {
             _context = context;
         }
 
-        public async Task UploadIncomesToDB(string jsonString)
+        public async Task UploadIncomesToDB(string jsonString, IncomesDto ordersDto)
         {
+            DateTime fromDate = DateTime.Parse(ordersDto.dateFrom);
             //Имеющиейся в базе поставки
-            var incomeIdList = _context.Incomes.Select(p => p.incomeId).ToList();
+            var contextIncomeList = _context.Incomes.Where(p => p.date >= fromDate).ToList();
             //Выгруженные с апи вб данные 
             List<JSONIncome> objData = JsonSerializer.Deserialize<List<JSONIncome>>(jsonString);
             //Фильтруем данные от уже имеющихся в базе
-            foreach (var item in incomeIdList)
+            foreach (var item in contextIncomeList)
             {
-                objData.RemoveAll(o => (o.incomeId == item & o.dateClose != DateTime.MinValue));
+                objData.RemoveAll(o => (o.incomeId == item.incomeId & o.dateClose == item.dateClose));
             }
             //Создаем списки поставки и состав поставки
             List<Income> incomeList = new List<Income>();
             List<IncomeDetail> incomeDetailsList =  new List<IncomeDetail>();
 
             //Разделяем данные с апи на сущности поставки и состава
-            foreach (JSONIncome objItem in objData)
+
+            foreach (JSONIncome jdo in objData)
             {
-                Income incomeItem = new Income();
-                IncomeDetail incomeDetailsItem = new IncomeDetail();
+                Income income = _mapper.Map<Income>(jdo);
+                IncomeDetail incomeDetail = _mapper.Map<IncomeDetail>(jdo);
+                incomeList.Add(income);
+                incomeDetailsList.Add(incomeDetail);
+            }
 
-                foreach (var prop in objItem.GetType().GetProperties())
-                {
-                    var tempProp = incomeItem.GetType().GetProperty(prop.Name);
-                    if (tempProp != null)
-                    {
-                        tempProp.SetValue(incomeItem, prop.GetValue(objItem));
-                    }
+            // foreach (JSONIncome objItem in objData)
+            // {
+            //     Income incomeItem = new Income();
+            //     IncomeDetail incomeDetailsItem = new IncomeDetail();
 
-                    tempProp = incomeDetailsItem.GetType().GetProperty(prop.Name);
-                    if (tempProp != null)
-                    {
-                        tempProp.SetValue(incomeDetailsItem, prop.GetValue(objItem));
-                    }
-                }
+            //     foreach (var prop in objItem.GetType().GetProperties())
+            //     {
+            //         var tempProp = incomeItem.GetType().GetProperty(prop.Name);
+            //         if (tempProp != null)
+            //         {
+            //             tempProp.SetValue(incomeItem, prop.GetValue(objItem));
+            //         }
 
-                if (!incomeIdList.Exists(x => x == incomeItem.incomeId) & !incomeList.Exists(x => x .incomeId == incomeItem.incomeId)) 
-                    incomeList.Add(incomeItem);
+            //         tempProp = incomeDetailsItem.GetType().GetProperty(prop.Name);
+            //         if (tempProp != null)
+            //         {
+            //             tempProp.SetValue(incomeDetailsItem, prop.GetValue(objItem));
+            //         }
+            //     }
+
+            //     if (!contextIncomeList.Exists(x => x.incomeId == incomeItem.incomeId) & !incomeList.Exists(x => x.incomeId == incomeItem.incomeId)) 
+            //         incomeList.Add(incomeItem);
                 
-                incomeDetailsList.Add(incomeDetailsItem);   
+            //     incomeDetailsList.Add(incomeDetailsItem);   
+            // }
+
+            foreach (Income item in incomeList)
+            {
+                Income temp = contextIncomeList.Find(o => o.incomeId == item.incomeId);
+                if (temp is null) continue;
+                temp.dateClose = item.dateClose;
+                incomeList.Remove(temp);
             }
             _context.AddRangeAsync(incomeList);
             
-            var statusList = _context.IncomeDetails.Where(p => p.status == "Приемка").ToList();
+            List<IncomeDetail> statusList = _context.IncomeDetails.Include(p => p.Income).Where(p => p.status != "Принято").ToList();
 
-            foreach (var item in statusList)
+            foreach (IncomeDetail item in statusList)
             {
-                IncomeDetail temp = incomeDetailsList.Find(o => (o.barcode == item.barcode & o.incomeId == item.incomeId & o.quantity == item.quantity));
+                IncomeDetail temp = incomeDetailsList.Find(o => (o.barcode == item.barcode & o.incomeId == item.incomeId));
+                if (temp is null) continue;
+                item.quantity = temp.quantity;
                 item.status = temp.status;
+                item.lastChangeDate = temp.lastChangeDate;
                 incomeDetailsList.Remove(temp);
             }
-            
+
             _context.AddRangeAsync(incomeDetailsList);
             _context.SaveChanges();
         }
@@ -77,20 +103,20 @@ namespace PostgreData
             _context.SaveChanges();
         }
 
-        public async Task UploadOrdersToDB(string jsonString)
+        public async Task UploadOrdersToDB(string jsonString, OrdersDto ordersDto)
         {
             //Получаем первый и последний заказы
-            var lastOrder = _context.Orders.OrderByDescending(o => o.odid).FirstOrDefault();
-            var firstOrder = _context.Orders.OrderBy(o => o.odid).FirstOrDefault();
+            var lastOrder = _context.OrderDetails.OrderByDescending(o => o.odid).FirstOrDefault();
+            var firstOrder = _context.OrderDetails.OrderBy(o => o.odid).FirstOrDefault();
         
             //фильтруем выгруженные заказы 
-            List<Order> objData = JsonSerializer.Deserialize<List<Order>>(jsonString);
+            List<JSONOrder> objData = JsonSerializer.Deserialize<List<JSONOrder>>(jsonString);
             if (firstOrder is not null)
             {
                 objData.RemoveAll(o => (o.odid >= firstOrder.odid & o.odid <= lastOrder.odid));
             }
             //Добавляем список в модель и выгружаем в базу
-            _context.AddRangeAsync(objData);
+            await _context.AddRangeAsync(objData);
             _context.SaveChanges();
         }
     }

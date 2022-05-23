@@ -5,9 +5,9 @@ namespace API.Entitites.WBEntities
 {
     public class Sale
     {
-        public string gNumber { get; set; }
-        [ForeignKey("odid")]
-        public Order Order { get; set; }
+        [Key]
+        public string saleID { get; set; }
+        
         public string number { get; set; }
         public DateTime date { get; set; }
         public DateTime lastChangeDate { get; set; }
@@ -25,10 +25,7 @@ namespace API.Entitites.WBEntities
         public string countryName { get; set; }
         public string oblastOkrugName { get; set; }
         public string regionName { get; set; }
-        public ulong incomeID { get; set; }
-        [Key]
-        public string saleID { get; set; }
-        public ulong odid { get; set; }
+        public ulong incomeID { get; set; }  
         public int spp { get; set; }
         public decimal forPay { get; set; }
         public decimal finishedPrice { get; set; }
@@ -38,5 +35,9 @@ namespace API.Entitites.WBEntities
         public string category { get; set; }
         public string brand { get; set; }
         public int IsStorno { get; set; }
+
+        [ForeignKey("odid")]
+        public OrderDetail OrderDetail { get; set; }
+        public ulong odid { get; set; }
     }
 }

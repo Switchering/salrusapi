@@ -47,6 +47,151 @@ namespace API.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("API.Entitites.WBEntities.FBOProduct", b =>
+                {
+                    b.Property<string>("BCWB_on_Box")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Bar_User")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Barcode1")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Order_Id")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Print_Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Printed")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Printer_Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Quant")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Request")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sector")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sticker1")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sticker2")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Template_Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("BCWB_on_Box");
+
+                    b.HasIndex("Order_Id");
+
+                    b.ToTable("FBO");
+                });
+
+            modelBuilder.Entity("API.Entitites.WBEntities.FBSProduct", b =>
+                {
+                    b.Property<string>("SHKWB")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Art")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Art_Color")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Bar_User")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CodSalrus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Naim")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Order_Id")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Print_Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Printed")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Printer_Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Quant")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Request")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SHK1")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SHK1C")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SHK2")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SHK3")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sticker1")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sticker2")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Template_Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("SHKWB");
+
+                    b.HasIndex("Order_Id");
+
+                    b.ToTable("FBS");
+                });
+
             modelBuilder.Entity("API.Entitites.WBEntities.Income", b =>
                 {
                     b.Property<int>("incomeId")
@@ -74,7 +219,7 @@ namespace API.Data.Migrations
                     b.ToTable("Incomes");
                 });
 
-            modelBuilder.Entity("API.Entitites.WBEntities.IncomeDetails", b =>
+            modelBuilder.Entity("API.Entitites.WBEntities.IncomeDetail", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -122,6 +267,22 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entitites.WBEntities.Order", b =>
                 {
+                    b.Property<string>("gNumber")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("number")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("gNumber");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("API.Entitites.WBEntities.OrderDetail", b =>
+                {
                     b.Property<decimal>("odid")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
@@ -137,9 +298,6 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("date")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("discountPercent")
                         .HasColumnType("integer");
 
@@ -149,6 +307,9 @@ namespace API.Data.Migrations
 
                     b.Property<decimal?>("incomeID")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<int>("incomeId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("isCancel")
                         .HasColumnType("boolean");
@@ -194,7 +355,28 @@ namespace API.Data.Migrations
 
                     b.HasKey("odid");
 
-                    b.ToTable("Orders");
+                    b.HasIndex("gNumber");
+
+                    b.HasIndex("incomeId");
+
+                    b.ToTable("OrderDetails");
+                });
+
+            modelBuilder.Entity("API.Entitites.WBEntities.PrintOrder", b =>
+                {
+                    b.Property<string>("Order_Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Order_Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Order_Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Order_Id");
+
+                    b.ToTable("PrintOrders");
                 });
 
             modelBuilder.Entity("API.Entitites.WBEntities.Sale", b =>
@@ -232,10 +414,6 @@ namespace API.Data.Migrations
 
                     b.Property<decimal>("forPay")
                         .HasColumnType("numeric");
-
-                    b.Property<string>("gNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<decimal>("incomeID")
                         .HasColumnType("numeric(20,0)");
@@ -308,7 +486,29 @@ namespace API.Data.Migrations
                     b.ToTable("Sales");
                 });
 
-            modelBuilder.Entity("API.Entitites.WBEntities.IncomeDetails", b =>
+            modelBuilder.Entity("API.Entitites.WBEntities.FBOProduct", b =>
+                {
+                    b.HasOne("API.Entitites.WBEntities.PrintOrder", "PrintOrder")
+                        .WithMany()
+                        .HasForeignKey("Order_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PrintOrder");
+                });
+
+            modelBuilder.Entity("API.Entitites.WBEntities.FBSProduct", b =>
+                {
+                    b.HasOne("API.Entitites.WBEntities.PrintOrder", "PrintOrder")
+                        .WithMany()
+                        .HasForeignKey("Order_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PrintOrder");
+                });
+
+            modelBuilder.Entity("API.Entitites.WBEntities.IncomeDetail", b =>
                 {
                     b.HasOne("API.Entitites.WBEntities.Income", "Income")
                         .WithMany("IncomeDetails")
@@ -319,25 +519,39 @@ namespace API.Data.Migrations
                     b.Navigation("Income");
                 });
 
-            modelBuilder.Entity("API.Entitites.WBEntities.Sale", b =>
+            modelBuilder.Entity("API.Entitites.WBEntities.OrderDetail", b =>
                 {
                     b.HasOne("API.Entitites.WBEntities.Order", "Order")
-                        .WithMany("Sales")
+                        .WithMany()
+                        .HasForeignKey("gNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entitites.WBEntities.Income", "Income")
+                        .WithMany()
+                        .HasForeignKey("incomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Income");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("API.Entitites.WBEntities.Sale", b =>
+                {
+                    b.HasOne("API.Entitites.WBEntities.OrderDetail", "OrderDetail")
+                        .WithMany()
                         .HasForeignKey("odid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("OrderDetail");
                 });
 
             modelBuilder.Entity("API.Entitites.WBEntities.Income", b =>
                 {
                     b.Navigation("IncomeDetails");
-                });
-
-            modelBuilder.Entity("API.Entitites.WBEntities.Order", b =>
-                {
-                    b.Navigation("Sales");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,15 +9,7 @@ namespace API.Controllers
 {
     public class ParseController : BaseApiController
     {
-        private HttpClient httpClient;
-
         string wbUrl =  "https://www.wildberries.ru/catalog/0/search.aspx?page=1&sort=popular&search=%D1%81%D1%82%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8";
-        string testUrl = "http://books.toscrape.com/catalogue/category/books/mystery_3/index.html";
-
-        public ParseController()
-        {
-            
-        }
         
         [HttpGet("Test")]
         public IActionResult Test()
@@ -32,10 +24,10 @@ namespace API.Controllers
             var cardLinks = new Dictionary<int,string>();
             var sellerNames = new List<string>();
             int i = 0;
-            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
+            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
-                Headless = false
+                Headless = true
             });
             var page = await browser.NewPageAsync();
             await page.SetRequestInterceptionAsync(true);

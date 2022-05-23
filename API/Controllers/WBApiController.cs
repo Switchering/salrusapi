@@ -13,7 +13,6 @@ namespace API.Controllers
     [Authorize]
     public class WBApiController : BaseApiController
     {
-        private HttpClient httpClient;
         private readonly IWBService _WBService;
         private readonly DataContext _context;
 
@@ -76,7 +75,7 @@ namespace API.Controllers
                     var jsonString = response.Content.ReadAsStringAsync().Result;
 
                     WBPostgre wbp = new WBPostgre(_context);
-                    await wbp.UploadOrdersToDB(jsonString);
+                    await wbp.UploadOrdersToDB(jsonString, ordersDto);
 
                     return Content(jsonString, "application/json");
                 }
@@ -100,7 +99,7 @@ namespace API.Controllers
                     var jsonString = response.Content.ReadAsStringAsync().Result;
 
                     WBPostgre wbp = new WBPostgre(_context);
-                    await wbp.UploadIncomesToDB(jsonString);
+                    await wbp.UploadIncomesToDB(jsonString, incomesDto);
 
                     return Content(jsonString, "application/json");
                 }
