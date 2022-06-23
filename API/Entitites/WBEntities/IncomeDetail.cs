@@ -12,8 +12,6 @@ namespace API.Entitites.WBEntities
         [ForeignKey("incomeId")]
         public Income Income { get; set; }
         public DateTime lastChangeDate { get; set; }
-        public string supplierArticle { get; set; }
-        public string techSize { get; set; }
         public string barcode { get; set; }
         public int quantity { get; set; }
         public decimal totalPrice { get; set; }

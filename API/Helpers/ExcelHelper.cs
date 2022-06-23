@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using ClosedXML.Excel;
+using API.Entitites.PrintEntities;
 
 namespace API.Helpers
 {
@@ -97,5 +98,117 @@ namespace API.Helpers
                 rowIndex++;
             }
         }
-    }
+
+        public PrintOrder GetPrintOrder(string fileName, string orderType)
+        {
+            if (orderType == "FBS")
+            {
+                int startIndex = fileName.IndexOf("(API");
+                string number = fileName.Substring(startIndex+4);
+                int endIndex = number.IndexOf(")");
+                number = number.Substring(0, endIndex);
+                PrintOrder printOrder = new PrintOrder{
+                    Order_Date = DateTime.Now,
+                    Order_Id = number,
+                    Order_Type = orderType
+                };
+                return printOrder;
+            }
+            else
+            {
+                int startIndex = fileName.IndexOf("(API");
+                string number = fileName.Substring(startIndex+4);
+                int endIndex = number.IndexOf(")");
+                number = number.Substring(0, endIndex);
+                PrintOrder printOrder = new PrintOrder{
+                    Order_Date = DateTime.Now,
+                    Order_Id = number,
+                    Order_Type = orderType
+                };
+                return printOrder;
+            }  
+        }
+
+        public List<FBSProduct> GetFBSProducts(Stream stream, string order_Id)
+        {
+            
+            using (XLWorkbook workbook = new XLWorkbook(stream))
+            {
+                IXLWorksheet workSheet = workbook.Worksheet(1);
+                //var workSheet = package.Workbook.Worksheets.First();
+                
+                int totalRows = workSheet.RowCount();
+
+                var DataList = new List<FBSProduct>();
+
+                for (int i = 2; i <= totalRows; i++)
+                {
+                    if (workSheet.Cell(i, 6).Value.ToString() == "")
+                        continue;
+
+                    DataList.Add(new FBSProduct
+                        {
+                            CodSalrus = workSheet.Cell(i, 1).Value.ToString(),        
+                            Quant = Convert.ToInt32(workSheet.Cell(i, 2).Value),
+                            Naim = workSheet.Cell(i, 3).Value.ToString(),
+                            Art = workSheet.Cell(i, 4).Value.ToString(),
+                            Art_Color = workSheet.Cell(i, 5).Value.ToString(),
+                            SHKWB = workSheet.Cell(i, 6).Value.ToString(),
+                            Sticker1 = workSheet.Cell(i, 7).Value.ToString(),
+                            Sticker2 = workSheet.Cell(i, 8).Value.ToString(),
+                            Request = workSheet.Cell(i, 9).Value.ToString(),
+                            SHK1 = workSheet.Cell(i, 10).Value.ToString(),
+                            SHK2 = workSheet.Cell(i, 11).Value.ToString(),
+                            SHK3 = workSheet.Cell(i, 12).Value.ToString(),
+                            SHK1C = workSheet.Cell(i, 13).Value.ToString(),
+                            Printed = "New",
+                            Order_Id = order_Id
+                        });
+                }
+
+                return DataList;
+            }
+        }
+
+        public List<FBSProduct> GetFBOProducts(Stream stream, string order_Id)
+        {
+            
+            using (XLWorkbook workbook = new XLWorkbook(stream))
+            {
+                IXLWorksheet workSheet = workbook.Worksheet(1);
+                //var workSheet = package.Workbook.Worksheets.First();
+                
+                int totalRows = workSheet.RowCount();
+
+                var DataList = new List<FBSProduct>();
+
+                for (int i = 2; i <= totalRows; i++)
+                {
+                    if (workSheet.Cell(i, 6).Value.ToString() == "")
+                        continue;
+
+                    DataList.Add(new FBSProduct
+                        {
+                            CodSalrus = workSheet.Cell(i, 1).Value.ToString(),        
+                            Quant = Convert.ToInt32(workSheet.Cell(i, 2).Value),
+                            Naim = workSheet.Cell(i, 3).Value.ToString(),
+                            Art = workSheet.Cell(i, 4).Value.ToString(),
+                            Art_Color = workSheet.Cell(i, 5).Value.ToString(),
+                            SHKWB = workSheet.Cell(i, 6).Value.ToString(),
+                            Sticker1 = workSheet.Cell(i, 7).Value.ToString(),
+                            Sticker2 = workSheet.Cell(i, 8).Value.ToString(),
+                            Request = workSheet.Cell(i, 9).Value.ToString(),
+                            SHK1 = workSheet.Cell(i, 10).Value.ToString(),
+                            SHK2 = workSheet.Cell(i, 11).Value.ToString(),
+                            SHK3 = workSheet.Cell(i, 12).Value.ToString(),
+                            SHK1C = workSheet.Cell(i, 13).Value.ToString(),
+                            Printed = "New",
+                            Order_Id = order_Id
+                        });
+                }
+
+                return DataList;
+            }
+        }
+   }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entitites;
 using API.Entitites.WBEntities;
+using API.Entitites.PrintEntities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -13,6 +14,7 @@ namespace API.Data
     {
         public DataContext(DbContextOptions options) : base(options)
         {
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
      

@@ -8,6 +8,7 @@ using API.JDOs;
 using API.Helpers;
 using System.Text.Json;
 using AutoMapper;
+using API.Interfaces;
 
 namespace API.Controllers
 {
@@ -15,8 +16,10 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        public TestController(DataContext context, IMapper mapper)
+        private readonly IWBRepository _wBRepository;
+        public TestController(DataContext context, IMapper mapper, IWBRepository wBRepository)
         {
+            _wBRepository = wBRepository;
             _context = context;
             _mapper = mapper;
         }
@@ -34,21 +37,6 @@ namespace API.Controllers
 
             }
             return BadRequest("Can not reach");
-            // using (var httpClient = _WBService.GetHttpClientOld())
-            // {
-            //     HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
-            //     if (response.IsSuccessStatusCode)
-            //     {
-            //         var jsonString = response.Content.ReadAsStringAsync().Result;
-
-            //         WBPostgre wbp = new WBPostgre(_context);
-            //         await wbp.UploadIncomesToDB(jsonString);
-
-            //         return Content(jsonString, "application/json");
-            //     }
-            //     else
-            //         return BadRequest("Can not reach");
-            // }
         }
 
         [HttpPost("quarterer")]
@@ -90,6 +78,47 @@ namespace API.Controllers
             }
             string resultString = JsonSerializer.Serialize(orderList);
             return Content(resultString, "application/json");
+        }
+
+        [HttpPost("GetOrders")]
+        [Authorize]
+        public async Task<ActionResult> GetOrders(OrdersDto ordersDto)
+        {
+            string jsonString;
+            List<JSONOrder> JSONOrderList;
+
+            using (StreamReader r = new StreamReader("TestData/orders.json"))
+            {
+                jsonString = r.ReadToEnd();
+            }
+            if (jsonString is null)
+                return BadRequest();
+            JSONOrderList = JsonSerializer.Deserialize<List<JSONOrder>>(jsonString);
+    
+            await _wBRepository.UploadOrdersToDB(JSONOrderList, ordersDto);
+
+            return Content(jsonString, "application/json");
+        
+        }
+
+         [HttpPost("GetSales")]
+        [Authorize]
+        public async Task<ActionResult> GetSales(SalesDto salesDto)
+        {
+            string jsonString;
+            List<JSONSale> JSONOSaleList;
+            using (StreamReader r = new StreamReader("TestData/sales.json"))
+            {
+                jsonString = r.ReadToEnd();
+            }
+            if (jsonString is null)
+                return BadRequest();
+            JSONOSaleList = JsonSerializer.Deserialize<List<JSONSale>>(jsonString);
+            
+            await _wBRepository.UploadSalesToDB(JSONOSaleList, salesDto);
+
+            return Content(jsonString, "application/json");
+        
         }
     }
 }

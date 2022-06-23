@@ -13,5 +13,8 @@ public class AppMappingProfile : Profile
 
             CreateMap<JSONIncome, Income>();
             CreateMap<JSONIncome, IncomeDetail>();
+
+			CreateMap<JSONSale, Sale>();
+            CreateMap<JSONSale, SaleDetail>();
 		}
 }

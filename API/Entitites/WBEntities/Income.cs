@@ -5,7 +5,7 @@ namespace API.Entitites.WBEntities
     public class Income
     {
         [Key]
-        public int incomeId { get; set; }
+        public int? incomeId { get; set; }
         public string number { get; set; }
         public DateTime date { get; set; }        
         public DateTime dateClose { get; set; }

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace API.Entitites.WBEntities
+namespace API.Entitites.PrintEntities
 {
     public class PrintOrder
     {

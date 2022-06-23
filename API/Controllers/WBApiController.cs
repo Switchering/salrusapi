@@ -2,9 +2,10 @@ using API.Data;
 using API.DTOs;
 using API.Helpers;
 using API.Interfaces;
+using API.JDOs;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PostgreData;
 using System.Text.Json;
 
 
@@ -14,33 +15,18 @@ namespace API.Controllers
     public class WBApiController : BaseApiController
     {
         private readonly IWBService _WBService;
-        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        private readonly IWBRepository _wBRepository;
 
-        public WBApiController(IWBService WBService, DataContext context)
+        public WBApiController(IWBService WBService, IMapper mapper, IWBRepository wBRepository)
         {
+            wBRepository = _wBRepository;
             _WBService = WBService;
-            _context = context;
-        }
-
-        //Excel functions move to salrusApi
-        [HttpPost("ExportToExcel")]
-        public async Task<ActionResult> ExportToExcel([FromBody] JsonDocument context)
-        {
-            var eh = new ExcelHelper();
-            string filename = "Excel";
-            // await eh.ExportJsonToExcel(filename, context);
-            var content = await eh.ExportJsonToExcel(filename, context);
-
-             return File(
-                content,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "users.xlsx");
-            // return BadRequest();
+            _mapper = mapper;
         }
 
         //Rename to UploadSales etc
         [HttpPost("GetSales")]
-        [Authorize]
         public async Task<ActionResult> GetSales(SalesDto salesDto)
         {
             string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/sales";
@@ -51,41 +37,45 @@ namespace API.Controllers
                 HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
-                    var jsonString = response.Content.ReadAsStringAsync().Result;
-                    //UploadSalesToDB(jsonString);
-                    return Content(jsonString, "application/json");
+                    string jsonString = response.Content.ReadAsStringAsync().Result;
+                    List<JSONSale> objData = JsonSerializer.Deserialize<List<JSONSale>>(jsonString);
+                    objData = response.Content.ReadFromJsonAsync<List<JSONSale>>().Result;
+                    if (objData.Count != 0)
+                    {
+                        await _wBRepository.UploadSalesToDB(objData, salesDto);
+                    }
+                    return Content("Загружено заказов: " + objData.Count.ToString());
                 }
                 else
-                    return BadRequest("Can not reach");
+                    return BadRequest(response.StatusCode);
             }
         }
 
         [HttpPost("GetOrders")]
-        [Authorize]
         public async Task<ActionResult> GetOrders(OrdersDto ordersDto)
         {
             string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/orders";
+            //Получаем URL с параметрами
             apiUrl = _WBService.GetFullUrl(apiUrl, ordersDto, true);
 
             using (var httpClient = _WBService.GetHttpClientOld())
             {
                 HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
-                {
-                    var jsonString = response.Content.ReadAsStringAsync().Result;
-
-                    WBPostgre wbp = new WBPostgre(_context);
-                    await wbp.UploadOrdersToDB(jsonString, ordersDto);
-
-                    return Content(jsonString, "application/json");
+                {                    
+                    List<JSONOrder> objData = response.Content.ReadFromJsonAsync<List<JSONOrder>>().Result;     
+                    if (objData.Count != 0)
+                    {
+                        await _wBRepository.UploadOrdersToDB(objData, ordersDto);
+                    }
+                    return Content("Загружено заказов: " + objData.Count.ToString());
                 }
                 else
-                    return BadRequest("Can not reach");
+                    return BadRequest(response.StatusCode);
             }
         }
 
         [HttpPost("GetIncomes")]
-        [Authorize]
         public async Task<ActionResult> GetIncomes(IncomesDto incomesDto)
         {
             string apiUrl = "https://suppliers-stats.wildberries.ru/api/v1/supplier/incomes";
@@ -96,19 +86,36 @@ namespace API.Controllers
                 HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
+                    List<JSONIncome> objData = response.Content.ReadFromJsonAsync<List<JSONIncome>>().Result;     
+                    //Дессериализация выгруженных данных
+                    if (objData.Count != 0)
+                    {
+                        await _wBRepository.UploadIncomesToDB(objData, incomesDto);
+                    }
+                    return Content("Загружено поставок: " + objData.Count.ToString());
+                }
+                else
+                    return BadRequest(response.StatusCode);
+            }
+        }
+
+        [HttpPost("GetWBProducts")]
+        public async Task<ActionResult> GetWBProducts()
+        {
+            string apiUrl = "https://suppliers-api.wildberries.ru/api/v2/card/list";
+            // return Content(apiUrl);
+            using (var httpClient = _WBService.GetHttpClient2())
+            {
+                HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
                     var jsonString = response.Content.ReadAsStringAsync().Result;
-
-                    WBPostgre wbp = new WBPostgre(_context);
-                    await wbp.UploadIncomesToDB(jsonString, incomesDto);
-
                     return Content(jsonString, "application/json");
                 }
                 else
                     return BadRequest("Can not reach");
             }
         }
-
-
 
         //WB Api 2.0
         [HttpPost("GetFBSOrders")]

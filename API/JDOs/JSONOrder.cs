@@ -15,11 +15,12 @@ namespace API.JDOs
         public int discountPercent { get; set; }
         public string warehouseName { get; set; }
         public string oblast { get; set; }
-        public ulong? incomeID { get; set; }
-        public ulong odid { get; set; }
+        public int incomeID { get; set; }
+        public long odid { get; set; }
         public ulong nmId { get; set; }
         public string subject { get; set; }
         public string category { get; set; }
+        public string brand { get; set; }
         public bool isCancel { get; set; }
         public DateTime cancel_dt { get; set; }
         public ulong number { get; set; }

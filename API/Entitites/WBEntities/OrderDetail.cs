@@ -6,7 +6,7 @@ namespace API.Entitites.WBEntities
     public class OrderDetail
     {
         [Key]
-        public ulong odid { get; set; }
+        public long odid { get; set; }
         public DateTime lastChangeDate { get; set; }
         public string supplierArticle { get; set; }
         public string techSize { get; set; }
@@ -19,6 +19,7 @@ namespace API.Entitites.WBEntities
         public ulong nmId { get; set; }
         public string subject { get; set; }
         public string category { get; set; }
+        public string brand { get; set; }
         public bool isCancel { get; set; }
         public DateTime cancel_dt { get; set; }
         public ulong number { get; set; }
@@ -30,6 +31,6 @@ namespace API.Entitites.WBEntities
         
         [ForeignKey("incomeId")]
         public Income Income { get; set; }
-        public ulong? incomeID { get; set; }
+        public int? incomeId { get; set; }
     }
 }
